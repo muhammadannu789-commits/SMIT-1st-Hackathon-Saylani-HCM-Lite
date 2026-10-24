@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HCM Lite - Login & First-Run Setup | Saylani Hackathon 2026</title>
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-page-wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 40%),
+                  radial-gradient(circle at bottom left, rgba(56, 189, 248, 0.08), transparent 40%),
+                  var(--hcm-body-bg);
+      padding: 1.5rem;
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 480px;
+      border-radius: 16px;
+      border: 1px solid var(--hcm-border-color);
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+      background-color: var(--hcm-card-bg);
+    }
+    .auth-header {
+      text-align: center;
+      padding: 2.25rem 2rem 1.25rem;
+    }
+    .auth-logo-badge {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #2563eb, #38bdf8);
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.75rem;
+      font-weight: 800;
+      box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+      margin-bottom: 1rem;
+    }
+    .demo-disclaimer {
+      font-size: 0.75rem;
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      margin-top: 1.5rem;
+      background-color: rgba(234, 179, 8, 0.1);
+      border: 1px solid rgba(234, 179, 8, 0.25);
+      color: #854d0e;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="auth-page-wrapper">
+    <div class="card auth-card">
+      <div class="auth-header">
+        <div class="auth-logo-badge">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <h3 class="fw-bold mb-1" id="authTitle">HCM Lite</h3>
+        <p class="text-muted small" id="authSubtitle">Human Capital Management Portal</p>
+      </div>
+
+      <div class="card-body p-4 pt-0">
+        <!-- FIRST-RUN SETUP CONTAINER -->
+        <div id="firstRunContainer" class="d-none">
+          <div class="alert alert-primary d-flex align-items-center gap-2 py-2 px-3 small mb-3">
+            <i class="bi bi-magic fs-5"></i>
+            <div><strong>Welcome!</strong> Complete this one-time setup to register your company and initialize the Administrator account.</div>
+          </div>
+
+          <form id="firstRunForm" novalidate>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Company Name <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-building"></i></span>
+                <input type="text" class="form-control" id="setupCompanyName" placeholder="e.g. Saylani Tech Ltd." required>
+              </div>
+              <div class="invalid-feedback" id="setupCompanyNameError"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Admin Full Name <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person"></i></span>
+                <input type="text" class="form-control" id="setupAdminName" placeholder="e.g. Muhammad Anas" required>
+              </div>
+              <div class="invalid-feedback" id="setupAdminNameError"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Admin Email Address <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control" id="setupAdminEmail" placeholder="admin@saylani.com" required>
+              </div>
+              <div class="invalid-feedback" id="setupAdminEmailError"></div>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Password <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                  <input type="password" class="form-control" id="setupAdminPassword" placeholder="Min 6 chars" required>
+                </div>
+                <div class="invalid-feedback" id="setupAdminPasswordError"></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Confirm Password <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <span class="input-group-text"><i class="bi bi-check2-circle"></i></span>
+                  <input type="password" class="form-control" id="setupConfirmPassword" placeholder="Repeat password" required>
+                </div>
+                <div class="invalid-feedback" id="setupConfirmPasswordError"></div>
+              </div>
+            </div>
+
+            <div id="setupAlert" class="alert alert-danger py-2 small d-none"></div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold">
+              <i class="bi bi-check-circle me-1"></i> Initialize Company & Admin
+            </button>
+          </form>
+        </div>
+
+        <!-- LOGIN CONTAINER -->
+        <div id="loginContainer" class="d-none">
+          <form id="loginForm" novalidate>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control" id="loginEmail" placeholder="name@company.com" required>
+              </div>
+              <div class="invalid-feedback" id="loginEmailError"></div>
+            </div>
+
+            <div class="mb-3">
+              <div class="d-flex justify-content-between align-items-center">
+                <label class="form-label small fw-semibold mb-0">Password <span class="text-danger">*</span></label>
+              </div>
+              <div class="input-group mt-1">
+                <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required>
+                <button class="btn btn-outline-secondary" type="button" id="togglePasswordBtn" title="Toggle password visibility">
+                  <i class="bi bi-eye"></i>
+                </button>
+              </div>
+              <div class="invalid-feedback" id="loginPasswordError"></div>
+            </div>
+
+            <div id="loginAlert" class="alert alert-danger py-2 small d-none"></div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold mb-2">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+            </button>
+          </form>
+
+          <!-- Quick Reset Link for Evaluator Convenience -->
+          <div class="text-center mt-3 pt-2 border-top">
+            <button type="button" class="btn btn-link btn-sm text-muted text-decoration-none p-0" id="btnRestartSetup">
+              <i class="bi bi-arrow-counterclockwise"></i> Reset all demo data and restart first-run setup
+            </button>
+          </div>
+        </div>
+
+        <!-- EDUCATIONAL DISCLAIMER (Mandatory per specification) -->
+        <div class="demo-disclaimer">
+          <div class="fw-bold mb-1"><i class="bi bi-shield-exclamation me-1"></i> Educational Project Disclaimer</div>
+          This application runs entirely in client-side browser <code>localStorage</code> for demonstration and hackathon evaluation. No real server or backend database is connected. Do not store sensitive or production passwords.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/helper.js"></script>
+  <script src="js/auth.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Route guard: if user is already logged in, redirect to their dashboard
+      const session = Storage.getSession();
+      if (session) {
+        if (session.role === 'Admin') {
+          window.location.replace('admin.html');
+          return;
+        } else {
+          window.location.replace('employee.html');
+          return;
+        }
+      }
+
+      const isFirstRun = Storage.isFirstRun();
+      const firstRunBox = document.getElementById('firstRunContainer');
+      const loginBox = document.getElementById('loginContainer');
+      const authTitle = document.getElementById('authTitle');
+      const authSubtitle = document.getElementById('authSubtitle');
+
+      if (isFirstRun) {
+        firstRunBox.classList.remove('d-none');
+        loginBox.classList.add('d-none');
+        authTitle.textContent = 'Company Setup';
+        authSubtitle.textContent = 'First-Run Administrator Configuration';
+      } else {
+        const company = Storage.getCompany();
+        firstRunBox.classList.add('d-none');
+        loginBox.classList.remove('d-none');
+        authTitle.textContent = company?.name || 'HCM Lite';
+        authSubtitle.textContent = 'Sign in to access your dashboard';
+      }
+
+      // Password visibility toggle
+      const toggleBtn = document.getElementById('togglePasswordBtn');
+      if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+          const pwdInput = document.getElementById('loginPassword');
+          const icon = toggleBtn.querySelector('i');
+          if (pwdInput.type === 'password') {
+            pwdInput.type = 'text';
+            icon.className = 'bi bi-eye-slash';
+          } else {
+            pwdInput.type = 'password';
+            icon.className = 'bi bi-eye';
+          }
+        });
+      }
+
+      // First-Run Form Handler
+      const firstRunForm = document.getElementById('firstRunForm');
+      if (firstRunForm) {
+        firstRunForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const companyName = document.getElementById('setupCompanyName').value.trim();
+          const adminName = document.getElementById('setupAdminName').value.trim();
+          const adminEmail = document.getElementById('setupAdminEmail').value.trim();
+          const adminPassword = document.getElementById('setupAdminPassword').value;
+          const confirmPassword = document.getElementById('setupConfirmPassword').value;
+          const alertBox = document.getElementById('setupAlert');
+
+          alertBox.classList.add('d-none');
+
+          const result = Auth.firstRunSetup({
+            companyName,
+            adminName,
+            adminEmail,
+            adminPassword,
+            confirmPassword
+          });
+
+          if (!result.success) {
+            alertBox.textContent = result.error;
+            alertBox.classList.remove('d-none');
+            return;
+          }
+
+          Helper.showToast('Setup complete! Welcome to HCM Lite.', 'success');
+          setTimeout(() => {
+            window.location.replace('admin.html');
+          }, 600);
+        });
+      }
+
+      // Login Form Handler
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const email = document.getElementById('loginEmail').value.trim();
+          const password = document.getElementById('loginPassword').value;
+          const alertBox = document.getElementById('loginAlert');
+
+          alertBox.classList.add('d-none');
+
+          const result = Auth.login(email, password);
+          if (!result.success) {
+            alertBox.textContent = result.error;
+            alertBox.classList.remove('d-none');
+            return;
+          }
+
+          Helper.showToast(`Welcome back, ${result.user.name}!`, 'success');
+          setTimeout(() => {
+            if (result.user.role === 'Admin') {
+              window.location.replace('admin.html');
+            } else {
+              window.location.replace('employee.html');
+            }
+          }, 500);
+        });
+      }
+
+      // Restart setup handler for evaluator convenience
+      const restartBtn = document.getElementById('btnRestartSetup');
+      if (restartBtn) {
+        restartBtn.addEventListener('click', () => {
+          if (confirm('Are you sure you want to clear all data and restart first-run setup?')) {
+            Storage.clearAll();
+            window.location.reload();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

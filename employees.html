@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Management - HCM Lite | Saylani Hackathon 2026</title>
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- SIDEBAR BACKDROP FOR MOBILE -->
+    <div class="sidebar-backdrop"></div>
+
+    <!-- SIDEBAR -->
+    <aside class="app-sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-brand-icon">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div>
+          <div class="sidebar-brand-title company-name-display">HCM Lite</div>
+          <div class="sidebar-brand-sub">Admin Console</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Main Menu</div>
+        <a href="admin.html" class="nav-link">
+          <i class="bi bi-grid-1x2-fill"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="employees.html" class="nav-link active">
+          <i class="bi bi-person-lines-fill"></i>
+          <span>Employees</span>
+        </a>
+        <a href="leaves.html" class="nav-link">
+          <i class="bi bi-calendar2-check-fill"></i>
+          <span>Leave Requests</span>
+        </a>
+        <a href="payslip.html" class="nav-link">
+          <i class="bi bi-cash-stack"></i>
+          <span>Monthly Payslips</span>
+        </a>
+
+        <div class="nav-section-title">Administration</div>
+        <a href="settings.html" class="nav-link">
+          <i class="bi bi-gear-fill"></i>
+          <span>Company Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-widget">
+          <div class="user-avatar-initials">AD</div>
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="fw-semibold text-white text-truncate user-name-display">Admin</div>
+            <div class="text-secondary small user-role-display">Administrator</div>
+          </div>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-link text-secondary p-0" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-three-dots-vertical fs-5"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow">
+              <li>
+                <button class="dropdown-item small" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                  <i class="bi bi-key me-2"></i> Change Password
+                </button>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <button class="dropdown-item small text-danger btn-logout">
+                  <i class="bi bi-box-arrow-right me-2"></i> Sign Out
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <div class="app-main">
+      <header class="app-topbar">
+        <div class="topbar-left">
+          <button class="sidebar-toggle-btn" aria-label="Toggle Sidebar">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          <h1 class="topbar-page-title">Employee Management</h1>
+        </div>
+
+        <div class="topbar-right">
+          <button class="btn btn-sm btn-outline-secondary rounded-circle p-2" id="themeToggleBtn" title="Toggle Theme">
+            <i class="bi bi-moon-stars-fill"></i>
+          </button>
+
+          <button class="btn btn-primary btn-sm d-flex align-items-center gap-1" id="btnAddEmployeeModal">
+            <i class="bi bi-person-plus-fill"></i>
+            <span>Add Employee</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <!-- FILTER AND SEARCH BAR -->
+        <div class="card mb-4">
+          <div class="card-body">
+            <div class="row g-3 align-items-center">
+              <div class="col-md-6 col-lg-5">
+                <div class="input-group">
+                  <span class="input-group-text bg-transparent border-end-0"><i class="bi bi-search text-muted"></i></span>
+                  <input type="text" class="form-control border-start-0" id="employeeSearchInput" placeholder="Search by employee name or email...">
+                </div>
+              </div>
+              <div class="col-md-4 col-lg-4">
+                <select class="form-select" id="departmentFilterSelect">
+                  <option value="">All Departments</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Human Resources">Human Resources</option>
+                  <option value="Sales">Sales</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Operations">Operations</option>
+                  <option value="Design">Design</option>
+                </select>
+              </div>
+              <div class="col-md-2 col-lg-3 text-md-end text-muted small">
+                <span id="employeeCountDisplay">Showing 0 employees</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- EMPLOYEE DIRECTORY TABLE -->
+        <div class="card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Employee</th>
+                    <th>Department</th>
+                    <th>Monthly Salary</th>
+                    <th>Role</th>
+                    <th>Date Joined</th>
+                    <th class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="employeesTableBody">
+                  <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyEmployeeState" class="empty-state-box d-none">
+              <div class="empty-state-icon"><i class="bi bi-person-badge"></i></div>
+              <div class="empty-state-title">No employees found</div>
+              <div class="empty-state-text">There are currently no employee records matching your query. Add your first team member to start managing staff.</div>
+              <button class="btn btn-primary btn-sm" onclick="openAddEmployeeModal()">
+                <i class="bi bi-plus-lg me-1"></i> Add Employee
+              </button>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD / EDIT EMPLOYEE -->
+  <div class="modal fade" id="employeeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="employeeModalTitle"><i class="bi bi-person-plus-fill me-2 text-primary"></i> Add Employee</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="employeeForm" novalidate>
+          <input type="hidden" id="editEmployeeId" value="">
+          <div class="modal-body">
+            <div class="alert alert-info py-2 small mb-3">
+              <i class="bi bi-info-circle me-1"></i> An employee account will be automatically provisioned with the specified email and password.
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Full Name <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" id="empNameInput" placeholder="e.g. Ayesha Khan" required>
+              <div class="invalid-feedback" id="empNameError"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Email Address <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" id="empEmailInput" placeholder="ayesha@company.com" required>
+              <div class="invalid-feedback" id="empEmailError"></div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold" id="empPasswordLabel">Initial Password <span class="text-danger">*</span></label>
+              <input type="password" class="form-control" id="empPasswordInput" placeholder="Minimum 6 characters" required>
+              <div class="invalid-feedback" id="empPasswordError"></div>
+              <small class="text-muted" id="empPasswordHint" style="display: none;">Leave blank to keep existing password.</small>
+            </div>
+
+            <div class="row g-2 mb-3">
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Department <span class="text-danger">*</span></label>
+                <select class="form-select" id="empDeptInput" required>
+                  <option value="">Select Department</option>
+                  <option value="Engineering">Engineering</option>
+                  <option value="Human Resources">Human Resources</option>
+                  <option value="Sales">Sales</option>
+                  <option value="Marketing">Marketing</option>
+                  <option value="Finance">Finance</option>
+                  <option value="Operations">Operations</option>
+                  <option value="Design">Design</option>
+                </select>
+                <div class="invalid-feedback" id="empDeptError"></div>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold">Monthly Salary (PKR) <span class="text-danger">*</span></label>
+                <input type="number" class="form-control" id="empSalaryInput" placeholder="e.g. 85000" min="1" step="any" required>
+                <div class="invalid-feedback" id="empSalaryError"></div>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Role</label>
+              <input type="text" class="form-control bg-light" value="Employee" disabled>
+              <small class="text-muted">Role is fixed to Employee according to HCM Lite policy.</small>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btnSaveEmployee">
+              <i class="bi bi-check-lg me-1"></i> Save Employee
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CHANGE PASSWORD -->
+  <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title"><i class="bi bi-key-fill me-2 text-primary"></i> Change Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <form id="changePasswordForm">
+          <div class="modal-body">
+            <div id="changePasswordError" class="alert alert-danger py-2 small d-none"></div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Current Password <span class="text-danger">*</span></label>
+              <input type="password" class="form-control" id="currentPasswordInput" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">New Password <span class="text-danger">*</span></label>
+              <input type="password" class="form-control" id="newPasswordInput" placeholder="Min 6 characters" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Confirm New Password <span class="text-danger">*</span></label>
+              <input type="password" class="form-control" id="confirmNewPasswordInput" required>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary">Update Password</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/helper.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/employees.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    let employeeModalInstance = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      App.init('Admin');
+      employeeModalInstance = new bootstrap.Modal(document.getElementById('employeeModal'));
+
+      renderEmployeeTable();
+
+      // Search & Filter listeners
+      document.getElementById('employeeSearchInput').addEventListener('input', renderEmployeeTable);
+      document.getElementById('departmentFilterSelect').addEventListener('change', renderEmployeeTable);
+
+      // Add Button
+      document.getElementById('btnAddEmployeeModal').addEventListener('click', openAddEmployeeModal);
+
+      // Form Submit (Add or Edit)
+      document.getElementById('employeeForm').addEventListener('submit', handleFormSubmit);
+    });
+
+    function openAddEmployeeModal() {
+      clearFormErrors();
+      document.getElementById('employeeForm').reset();
+      document.getElementById('editEmployeeId').value = '';
+      document.getElementById('employeeModalTitle').innerHTML = '<i class="bi bi-person-plus-fill me-2 text-primary"></i> Add Employee';
+      document.getElementById('empPasswordLabel').innerHTML = 'Initial Password <span class="text-danger">*</span>';
+      document.getElementById('empPasswordInput').required = true;
+      document.getElementById('empPasswordHint').style.display = 'none';
+      employeeModalInstance.show();
+    }
+
+    function openEditEmployeeModal(id) {
+      clearFormErrors();
+      const user = Storage.getUserById(id);
+      if (!user) {
+        Helper.showToast('Employee not found.', 'danger');
+        return;
+      }
+
+      document.getElementById('editEmployeeId').value = user.id;
+      document.getElementById('empNameInput').value = user.name;
+      document.getElementById('empEmailInput').value = user.email;
+      document.getElementById('empDeptInput').value = user.department;
+      document.getElementById('empSalaryInput').value = user.salary;
+      document.getElementById('empPasswordInput').value = '';
+      document.getElementById('empPasswordInput').required = false;
+
+      document.getElementById('employeeModalTitle').innerHTML = '<i class="bi bi-pencil-square me-2 text-primary"></i> Edit Employee';
+      document.getElementById('empPasswordLabel').innerHTML = 'Change Password (Optional)';
+      document.getElementById('empPasswordHint').style.display = 'block';
+
+      employeeModalInstance.show();
+    }
+
+    function handleFormSubmit(e) {
+      e.preventDefault();
+      clearFormErrors();
+
+      const editId = document.getElementById('editEmployeeId').value;
+      const isEdit = !!editId;
+
+      const data = {
+        name: document.getElementById('empNameInput').value,
+        email: document.getElementById('empEmailInput').value,
+        password: document.getElementById('empPasswordInput').value,
+        department: document.getElementById('empDeptInput').value,
+        salary: document.getElementById('empSalaryInput').value
+      };
+
+      let result;
+      if (isEdit) {
+        result = EmployeeManager.updateEmployee(editId, data);
+      } else {
+        result = EmployeeManager.addEmployee(data);
+      }
+
+      if (!result.success) {
+        displayFormErrors(result.errors);
+        return;
+      }
+
+      employeeModalInstance.hide();
+      Helper.showToast(isEdit ? 'Employee updated successfully!' : 'Employee added and login account created!', 'success');
+      renderEmployeeTable();
+    }
+
+    function deleteEmployee(id, name) {
+      const confirmed = confirm(`Are you sure you want to delete "${name}"?\n\nWARNING: Deleting an employee permanently removes their user account, attendance records, and leave requests.`);
+      if (!confirmed) return;
+
+      const res = EmployeeManager.deleteEmployee(id);
+      if (res.success) {
+        Helper.showToast(`Employee "${name}" deleted.`, 'success');
+        renderEmployeeTable();
+      } else {
+        Helper.showToast(res.error || 'Failed to delete employee.', 'danger');
+      }
+    }
+
+    function clearFormErrors() {
+      ['empName', 'empEmail', 'empPassword', 'empDept', 'empSalary'].forEach(prefix => {
+        const input = document.getElementById(prefix + 'Input');
+        const err = document.getElementById(prefix + 'Error');
+        if (input) input.classList.remove('is-invalid');
+        if (err) err.textContent = '';
+      });
+    }
+
+    function displayFormErrors(errors = {}) {
+      const mapping = {
+        name: 'empName',
+        email: 'empEmail',
+        password: 'empPassword',
+        department: 'empDept',
+        salary: 'empSalary'
+      };
+
+      for (const [key, msg] of Object.entries(errors)) {
+        const prefix = mapping[key];
+        if (prefix) {
+          const input = document.getElementById(prefix + 'Input');
+          const err = document.getElementById(prefix + 'Error');
+          if (input) input.classList.add('is-invalid');
+          if (err) err.textContent = msg;
+        }
+      }
+    }
+
+    function renderEmployeeTable() {
+      const tbody = document.getElementById('employeesTableBody');
+      const emptyState = document.getElementById('emptyEmployeeState');
+      const countDisplay = document.getElementById('employeeCountDisplay');
+
+      const searchQuery = (document.getElementById('employeeSearchInput').value || '').trim().toLowerCase();
+      const selectedDept = document.getElementById('departmentFilterSelect').value;
+
+      let employees = EmployeeManager.getAll();
+
+      // Apply search filter
+      if (searchQuery) {
+        employees = employees.filter(e =>
+          e.name.toLowerCase().includes(searchQuery) ||
+          e.email.toLowerCase().includes(searchQuery)
+        );
+      }
+
+      // Apply department filter
+      if (selectedDept) {
+        employees = employees.filter(e => e.department === selectedDept);
+      }
+
+      countDisplay.textContent = `Showing ${employees.length} employee${employees.length === 1 ? '' : 's'}`;
+
+      if (employees.length === 0) {
+        tbody.innerHTML = '';
+        emptyState.classList.remove('d-none');
+        return;
+      }
+
+      emptyState.classList.add('d-none');
+      tbody.innerHTML = employees.map(emp => `
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-3">
+              <div class="user-avatar-initials" style="width: 36px; height: 36px; font-size: 0.85rem;">
+                ${emp.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase()}
+              </div>
+              <div>
+                <div class="fw-semibold">${emp.name}</div>
+                <small class="text-muted">${emp.email}</small>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge bg-light text-dark border px-2 py-1">${emp.department}</span></td>
+          <td class="fw-semibold">${Helper.formatCurrency(emp.salary)}</td>
+          <td><span class="badge bg-info-subtle text-info-emphasis">Employee</span></td>
+          <td class="text-muted small">${Helper.formatDate(emp.createdAt ? emp.createdAt.split('T')[0] : '')}</td>
+          <td class="text-end">
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-secondary" title="Edit Employee" onclick="openEditEmployeeModal('${emp.id}')">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-outline-danger" title="Delete Employee" onclick="deleteEmployee('${emp.id}', '${emp.name}')">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Monthly Payslip - HCM Lite | Saylani Hackathon 2026</title>
+  <!-- Bootstrap 5 CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- SIDEBAR (hidden on print) -->
+    <div class="sidebar-backdrop"></div>
+    <aside class="app-sidebar no-print">
+      <div class="sidebar-header">
+        <div class="sidebar-brand-icon">
+          <i class="bi bi-people-fill"></i>
+        </div>
+        <div>
+          <div class="sidebar-brand-title company-name-display">HCM Lite</div>
+          <div class="sidebar-brand-sub" id="sidebarRoleSubtitle">Portal</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" id="payslipSidebarNav">
+        <!-- Rendered dynamically based on role -->
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-profile-widget">
+          <div class="user-avatar-initials">US</div>
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="fw-semibold text-white text-truncate user-name-display">User</div>
+            <div class="text-secondary small user-role-display">Role</div>
+          </div>
+          <button class="btn btn-sm btn-link text-danger p-0 btn-logout" title="Sign Out">
+            <i class="bi bi-box-arrow-right fs-5"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <div class="app-main">
+      <!-- TOPBAR (hidden on print) -->
+      <header class="app-topbar no-print">
+        <div class="topbar-left">
+          <button class="sidebar-toggle-btn" aria-label="Toggle Sidebar">
+            <i class="bi bi-list fs-5"></i>
+          </button>
+          <h1 class="topbar-page-title">Monthly Payslip Statement</h1>
+        </div>
+
+        <div class="topbar-right">
+          <button class="btn btn-sm btn-outline-secondary rounded-circle p-2" id="themeToggleBtn" title="Toggle Theme">
+            <i class="bi bi-moon-stars-fill"></i>
+          </button>
+          <button class="btn btn-primary btn-sm d-flex align-items-center gap-1" onclick="window.print()">
+            <i class="bi bi-printer-fill"></i>
+            <span>Print / Save as PDF</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="app-content">
+        <!-- CONTROLS & SELECTORS BAR (hidden on print) -->
+        <div class="card mb-4 no-print payslip-actions-bar">
+          <div class="card-body">
+            <div class="row g-3 align-items-center">
+              <!-- Employee Selector (Admin selects any employee; Employee locked to themselves) -->
+              <div class="col-md-5">
+                <label class="form-label small fw-semibold">Select Employee</label>
+                <select class="form-select" id="payslipEmployeeSelect">
+                  <!-- Populated via JS -->
+                </select>
+              </div>
+
+              <!-- Month Selector (YYYY-MM) -->
+              <div class="col-md-4">
+                <label class="form-label small fw-semibold">Payroll Month</label>
+                <input type="month" class="form-control" id="payslipMonthSelect">
+              </div>
+
+              <!-- Generate Button & Print Action -->
+              <div class="col-md-3 d-flex align-items-end gap-2">
+                <button type="button" class="btn btn-primary w-100" id="btnGeneratePayslip">
+                  <i class="bi bi-calculator me-1"></i> Calculate
+                </button>
+                <button type="button" class="btn btn-outline-success" onclick="window.print()" title="Print Payslip">
+                  <i class="bi bi-printer"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PRINTABLE PAYSLIP CONTAINER -->
+        <div id="payslipPrintArea">
+          <!-- Empty State before calculation -->
+          <div id="payslipEmptyState" class="empty-state-box card p-5 text-center d-none">
+            <div class="empty-state-icon"><i class="bi bi-receipt"></i></div>
+            <div class="empty-state-title">No Payslip Generated</div>
+            <div class="empty-state-text">Select an employee and payroll period above, then click <strong>Calculate</strong> to produce the statement.</div>
+          </div>
+
+          <!-- The Professional Payslip Sheet -->
+          <div id="payslipSheet" class="payslip-sheet card d-none">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-start border-bottom pb-3 mb-4">
+              <div>
+                <div class="d-flex align-items-center gap-2 mb-1">
+                  <div class="sidebar-brand-icon" style="width: 32px; height: 32px; font-size: 1rem;">
+                    <i class="bi bi-people-fill"></i>
+                  </div>
+                  <h3 class="payslip-header-title company-name-display" id="slipCompanyName">Saylani HCM Lite</h3>
+                </div>
+                <div class="payslip-tagline">Human Capital Management &bull; Payroll Division</div>
+              </div>
+              <div class="text-end">
+                <span class="badge bg-primary text-uppercase px-3 py-2 fw-bold" style="letter-spacing: 0.08em;">Salary Statement</span>
+                <div class="small text-muted mt-1">Generated: <span id="slipGeneratedDate">Oct 24, 2026</span></div>
+              </div>
+            </div>
+
+            <!-- Employee & Month Metadata Grid -->
+            <div class="payslip-meta-grid">
+              <div class="payslip-meta-item">
+                <span class="payslip-meta-label">Employee Name</span>
+                <span class="payslip-meta-val" id="slipEmpName">--</span>
+              </div>
+              <div class="payslip-meta-item">
+                <span class="payslip-meta-label">Payroll Period</span>
+                <span class="payslip-meta-val text-primary" id="slipPeriod">--</span>
+              </div>
+              <div class="payslip-meta-item">
+                <span class="payslip-meta-label">Employee ID & Email</span>
+                <span class="payslip-meta-val" id="slipEmpIdEmail">--</span>
+              </div>
+              <div class="payslip-meta-item">
+                <span class="payslip-meta-label">Department</span>
+                <span class="payslip-meta-val" id="slipEmpDept">--</span>
+              </div>
+            </div>
+
+            <!-- Attendance & Work Days Summary Metrics -->
+            <h6 class="fw-bold text-uppercase small text-muted mb-2" style="letter-spacing: 0.05em;">Work Schedule & Attendance Metrics</h6>
+            <div class="row g-2 text-center mb-4">
+              <div class="col">
+                <div class="p-2 border rounded bg-light">
+                  <div class="text-muted small">Total Working Days</div>
+                  <div class="fw-bold fs-5 text-dark" id="slipTotalWorkingDays">0</div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="p-2 border rounded bg-light">
+                  <div class="text-muted small">Days Present</div>
+                  <div class="fw-bold fs-5 text-success" id="slipDaysPresent">0</div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="p-2 border rounded bg-light">
+                  <div class="text-muted small">Approved Leaves</div>
+                  <div class="fw-bold fs-5 text-primary" id="slipDaysLeave">0</div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="p-2 border rounded bg-light">
+                  <div class="text-muted small">Half Days (0.5)</div>
+                  <div class="fw-bold fs-5 text-warning" id="slipDaysHalf">0</div>
+                </div>
+              </div>
+              <div class="col">
+                <div class="p-2 border rounded bg-light">
+                  <div class="text-muted small">Absent Days</div>
+                  <div class="fw-bold fs-5 text-danger" id="slipDaysAbsent">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Financial Breakdown Table -->
+            <h6 class="fw-bold text-uppercase small text-muted mb-2" style="letter-spacing: 0.05em;">Earnings & Deductions Breakdown</h6>
+            <div class="table-responsive mb-3">
+              <table class="table payslip-table mb-0">
+                <thead>
+                  <tr>
+                    <th style="width: 50%;">Earnings (Basic & Allowances)</th>
+                    <th style="width: 15%; text-align: right;">Amount</th>
+                    <th style="width: 20%;">Deductions</th>
+                    <th style="width: 15%; text-align: right;">Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div class="fw-semibold">Monthly Basic Salary</div>
+                      <div class="text-muted small">Per-day rate: <span id="slipPerDayRate">PKR 0.00</span> / day</div>
+                    </td>
+                    <td class="text-end fw-semibold" id="slipGrossSalary">PKR 0.00</td>
+                    <td>
+                      <div class="fw-semibold text-danger">Absenteeism Deduction</div>
+                      <div class="text-muted small" id="slipAbsentDetail">0 days &times; per-day salary</div>
+                    </td>
+                    <td class="text-end text-danger fw-semibold" id="slipAbsentDeduction">PKR 0.00</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <div class="text-muted">Standard Working Allowance</div>
+                      <div class="text-muted small">Included in basic contract</div>
+                    </td>
+                    <td class="text-end text-muted">PKR 0.00</td>
+                    <td>
+                      <div class="fw-semibold text-warning">Half-Day Work Penalty</div>
+                      <div class="text-muted small" id="slipHalfDayDetail">0 half days &times; 0.5 &times; per-day</div>
+                    </td>
+                    <td class="text-end text-warning fw-semibold" id="slipHalfDayDeduction">PKR 0.00</td>
+                  </tr>
+                  <tr class="payslip-total-row">
+                    <td>Total Gross Earnings</td>
+                    <td class="text-end" id="slipTotalGross">PKR 0.00</td>
+                    <td>Total Deductions</td>
+                    <td class="text-end text-danger" id="slipTotalDeductions">PKR 0.00</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Required Formula Explanation Box -->
+            <div class="p-2 border rounded bg-body-tertiary small text-muted mb-3">
+              <strong>Salary Computation Formula:</strong><br>
+              &bull; Per-day salary = Monthly salary ÷ working days in month<br>
+              &bull; Deduction = Per-day salary &times; (absent days + 0.5 &times; half days)<br>
+              &bull; Net salary = Monthly salary &minus; deduction
+            </div>
+
+            <!-- Net Salary Callout Box -->
+            <div class="payslip-net-box">
+              <div>
+                <div class="payslip-net-label">NET PAYABLE SALARY</div>
+                <div class="text-muted small" id="slipAmountInWords">Zero Rupees Only</div>
+              </div>
+              <div class="payslip-net-amount" id="slipNetSalary">PKR 0.00</div>
+            </div>
+
+            <!-- Signatures Section -->
+            <div class="payslip-signatures">
+              <div class="signature-block">
+                <div class="signature-line"></div>
+                <div class="signature-label">Employee Signature</div>
+              </div>
+              <div class="signature-block">
+                <div class="signature-line"></div>
+                <div class="signature-label">Authorised Signatory / HR Dept</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="js/storage.js"></script>
+  <script src="js/helper.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/employees.js"></script>
+  <script src="js/payslip.js"></script>
+  <script src="js/app.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // Allow both Admin and Employee, but protect unauthenticated
+      const session = Auth.protectPage(null);
+      if (!session) return;
+
+      App.init();
+
+      // Set default month to current year and month (e.g. 2026-10)
+      const now = new Date();
+      const currentYearMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const monthInput = document.getElementById('payslipMonthSelect');
+      monthInput.value = currentYearMonth;
+
+      const employeeSelect = document.getElementById('payslipEmployeeSelect');
+      const sidebarNav = document.getElementById('payslipSidebarNav');
+      const roleSubtitle = document.getElementById('sidebarRoleSubtitle');
+
+      if (session.role === 'Admin') {
+        roleSubtitle.textContent = 'Admin Console';
+        sidebarNav.innerHTML = `
+          <div class="nav-section-title">Main Menu</div>
+          <a href="admin.html" class="nav-link">
+            <i class="bi bi-grid-1x2-fill"></i>
+            <span>Dashboard</span>
+          </a>
+          <a href="employees.html" class="nav-link">
+            <i class="bi bi-person-lines-fill"></i>
+            <span>Employees</span>
+          </a>
+          <a href="leaves.html" class="nav-link">
+            <i class="bi bi-calendar2-check-fill"></i>
+            <span>Leave Requests</span>
+          </a>
+          <a href="payslip.html" class="nav-link active">
+            <i class="bi bi-cash-stack"></i>
+            <span>Monthly Payslips</span>
+          </a>
+          <div class="nav-section-title">Administration</div>
+          <a href="settings.html" class="nav-link">
+            <i class="bi bi-gear-fill"></i>
+            <span>Company Settings</span>
+          </a>
+        `;
+
+        // Admin can select any registered employee
+        const employees = EmployeeManager.getAll();
+        if (employees.length === 0) {
+          employeeSelect.innerHTML = '<option value="">No employees found</option>';
+        } else {
+          employeeSelect.innerHTML = employees.map(e => `
+            <option value="${e.id}">${e.name} (${e.department}) - ${Helper.formatCurrency(e.salary)}</option>
+          `).join('');
+        }
+      } else {
+        // Employee is locked to their own payslip
+        roleSubtitle.textContent = 'Employee Portal';
+        sidebarNav.innerHTML = `
+          <div class="nav-section-title">My Workspace</div>
+          <a href="employee.html" class="nav-link">
+            <i class="bi bi-speedometer2"></i>
+            <span>My Dashboard</span>
+          </a>
+          <a href="payslip.html" class="nav-link active">
+            <i class="bi bi-receipt-cutoff"></i>
+            <span>My Payslip</span>
+          </a>
+        `;
+
+        employeeSelect.innerHTML = `<option value="${session.id}" selected>${session.name} (${session.department || 'Staff'})</option>`;
+        employeeSelect.disabled = true;
+      }
+
+      // Generate Payslip Button Handler
+      document.getElementById('btnGeneratePayslip').addEventListener('click', generatePayslip);
+
+      // Auto generate on initial load if employee exists
+      if (employeeSelect.value) {
+        generatePayslip();
+      } else {
+        document.getElementById('payslipEmptyState').classList.remove('d-none');
+        document.getElementById('payslipSheet').classList.add('d-none');
+      }
+    });
+
+    function generatePayslip() {
+      const empSelect = document.getElementById('payslipEmployeeSelect');
+      const employeeId = empSelect.value;
+      const yearMonth = document.getElementById('payslipMonthSelect').value;
+
+      const emptyState = document.getElementById('payslipEmptyState');
+      const sheet = document.getElementById('payslipSheet');
+
+      if (!employeeId || !yearMonth) {
+        Helper.showToast('Please select both an employee and a payroll period.', 'warning');
+        emptyState.classList.remove('d-none');
+        sheet.classList.add('d-none');
+        return;
+      }
+
+      const res = PayslipCalculator.calculate(employeeId, yearMonth);
+      if (!res.success) {
+        Helper.showToast(res.error || 'Failed to calculate payslip.', 'danger');
+        emptyState.classList.remove('d-none');
+        sheet.classList.add('d-none');
+        return;
+      }
+
+      emptyState.classList.add('d-none');
+      sheet.classList.remove('d-none');
+
+      // Populate Payslip Template
+      document.getElementById('slipCompanyName').textContent = res.company.name;
+      document.getElementById('slipGeneratedDate').textContent = Helper.formatDate(Helper.getTodayDateString());
+
+      document.getElementById('slipEmpName').textContent = res.employee.name;
+      document.getElementById('slipPeriod').textContent = `${res.period.monthName} ${res.period.year}`;
+      document.getElementById('slipEmpIdEmail').textContent = `${res.employee.id} • ${res.employee.email}`;
+      document.getElementById('slipEmpDept').textContent = res.employee.department;
+
+      // Metrics
+      document.getElementById('slipTotalWorkingDays').textContent = res.metrics.totalWorkingDays;
+      document.getElementById('slipDaysPresent').textContent = res.metrics.presentDays;
+      document.getElementById('slipDaysLeave').textContent = res.metrics.leaveDays;
+      document.getElementById('slipDaysHalf').textContent = res.metrics.halfDays;
+      document.getElementById('slipDaysAbsent').textContent = res.metrics.absentDays;
+
+      // Earnings & Deductions
+      document.getElementById('slipPerDayRate').textContent = Helper.formatCurrency(res.calculations.perDaySalary);
+      document.getElementById('slipGrossSalary').textContent = Helper.formatCurrency(res.calculations.monthlySalary);
+      document.getElementById('slipTotalGross').textContent = Helper.formatCurrency(res.calculations.monthlySalary);
+
+      document.getElementById('slipAbsentDetail').textContent = `${res.metrics.absentDays} day(s) &times; ${Helper.formatCurrency(res.calculations.perDaySalary)}`;
+      document.getElementById('slipAbsentDeduction').textContent = Helper.formatCurrency(res.calculations.absentDeduction);
+
+      document.getElementById('slipHalfDayDetail').textContent = `${res.metrics.halfDays} half day(s) &times; 0.5 &times; rate`;
+      document.getElementById('slipHalfDayDeduction').textContent = Helper.formatCurrency(res.calculations.halfDayDeduction);
+
+      document.getElementById('slipTotalDeductions').textContent = Helper.formatCurrency(res.calculations.totalDeduction);
+
+      document.getElementById('slipNetSalary').textContent = Helper.formatCurrency(res.calculations.netSalary);
+      document.getElementById('slipAmountInWords').textContent = PayslipCalculator.numberToWords(res.calculations.netSalary);
+    }
+  </script>
+</body>
+</html>
